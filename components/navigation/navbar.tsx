@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Logo from "./logo";
 import MenuToggle from "./menu-toggle";
-import { ModeToggle } from "./mode-toggle";
+
 
 const Navbar = () => {
   return (
