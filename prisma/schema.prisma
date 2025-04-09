@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id              Int       @id @default(autoincrement())
+  name            String
+  email           String    @unique
+  phone           String?
+  orders          Order[]
+  address         String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  totalSpend      Float     @default(0.0)
+  lifetimeValue   Float     @default(0.0)
+  lastOrderDate   DateTime?
+  location        String?
+  supportTickets  CustomerSupportTicket?
+}
+
+model Order {
+  id              Int       @id @default(autoincrement())
+  orderId         String    @unique
+  customer        Customer  @relation(fields: [customerId], references: [id])
+  customerId      Int
+  status          OrderStatus @relation(fields: [statusId], references: [id])
+  statusId        Int
+  items           Json
+  totalAmount     Float
+  paymentStatus   PaymentStatus @relation(fields: [paymentStatusId], references: [id])
+  paymentStatusId Int
+  fulfillment     Fulfillment?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  canceledAt      DateTime?
+  supportTickets  CustomerSupportTicket?
+  Product Product[]
+}
+
+model OrderStatus {
+  id          Int       @id @default(autoincrement())
+  status      String    @unique
+  orders      Order[]
+  description String?
+  createdAt   DateTime  @default(now())
+}
+
+model PaymentStatus {
+  id          Int       @id @default(autoincrement())
+  status      String    @unique
+  orders      Order[]
+  description String?
+  createdAt   DateTime  @default(now())
+}
+
+model Fulfillment {
+  id              Int       @id @default(autoincrement())
+  order           Order     @relation(fields: [orderId], references: [id])
+  orderId         Int       @unique
+  fulfilledBy     String
+  warehouse       String
+  shipmentTracking String
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Product {
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String?
+  price           Float
+  sku             String    @unique
+  stockLevel      Int
+  category        Category  @relation(fields: [categoryId], references: [id])
+  categoryId      Int
+  orders          Order[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  rating          Float     @default(0.0)
+  returnRate      Float     @default(0.0)
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model CustomerSupportTicket {
+  id              Int       @id @default(autoincrement())
+  customer        Customer  @relation(fields: [customerId], references: [id])
+  customerId      Int       @unique
+  order           Order?    @relation(fields: [orderId], references: [id])
+  orderId         Int?      @unique
+  subject         String
+  description     String
+  status          String
+  resolutionTime  Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  resolvedAt      DateTime?
+}
+
+model Analytics {
+  id              Int       @id @default(autoincrement())
+  totalRevenue    Float     @default(0.0)
+  totalOrders     Int       @default(0)
+  avgOrderValue   Float     @default(0.0)
+  topCustomers    Json
+  topProducts     Json
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
